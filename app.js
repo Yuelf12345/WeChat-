@@ -1,6 +1,6 @@
 const Koa = require('koa')
 const Router = require('koa-router')
-const { koaBody } = require('koa-body')
+// const { koaBody } = require('koa-body')
 const xmlParser = require('koa-xml-body');
 const axios = require("axios");
 const crypto = require('crypto');
@@ -36,6 +36,19 @@ router.get('/test', (ctx) => {
         ctx.body = "wrong";
     }
 })
+
+const getAccessToken = async () => {
+    const res_Token = await axios.post(
+        `${URL_1}?grant_type=${grant_type}&client_id=${API_Key}&client_secret=${Secret_Key}`
+    );
+    access_token = res_Token.data.access_token
+    return
+}
+
+setInterval(async () => {
+    await getAccessToken()
+}, (7200 - 300) * 1000);
+
 router.post('/test', async (ctx) => {
     const xml = ctx.request.body;
     console.log('xml', xml)
@@ -55,11 +68,6 @@ router.post('/test', async (ctx) => {
          </xml>`;
     } else {//其他情况
         try {
-            console.log('access_token 发');
-            const res_Token = await axios.post(
-                `${URL_1}?grant_type=${grant_type}&client_id=${API_Key}&client_secret=${Secret_Key}`
-            );
-            access_token = res_Token.data.access_token
             console.log('access_token', access_token);
             let messages = []
             messages.push({ role: "user", content: content })
